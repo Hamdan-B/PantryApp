@@ -14,6 +14,7 @@ import 'package:pantry_app/presentation/screens/pantry/pantry_screen.dart';
 import 'package:pantry_app/presentation/screens/planner/planner_screen.dart';
 import 'package:pantry_app/presentation/screens/profile/profile_screen.dart';
 import 'package:pantry_app/presentation/screens/analytics/analytics_screen.dart';
+import 'package:pantry_app/presentation/screens/wishlist/wishlist_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -128,6 +129,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   final List<Widget> _screens = const [
     HomeScreen(),
     PantryScreen(),
+    WishlistScreen(),
     PlannerScreen(),
     ProfileScreen(),
   ];
@@ -149,6 +151,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           NavigationDestination(
             icon: Icon(Icons.shopping_cart),
             label: 'Pantry',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.favorite),
+            label: 'Wishlist',
           ),
           NavigationDestination(
             icon: Icon(Icons.calendar_month),

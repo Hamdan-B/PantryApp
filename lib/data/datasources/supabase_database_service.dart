@@ -274,4 +274,62 @@ class SupabaseDatabaseService {
       );
     }
   }
+
+  // Wishlist operations
+  Future<void> addWishlistItem(Map<String, dynamic> item) async {
+    try {
+      print('DatabaseService: Adding wishlist item: $item');
+      await _supabaseClient.from('wishlist').insert(item);
+      print('DatabaseService: Wishlist item added successfully');
+    } on PostgrestException catch (e) {
+      print(
+          'DatabaseService: PostgrestException - ${e.message} (code: ${e.code})');
+      throw DatabaseException(
+        message: e.message,
+        code: e.code,
+      );
+    } catch (e) {
+      print('DatabaseService: Exception adding wishlist item - $e');
+      throw DatabaseException(
+        message: 'Failed to add wishlist item: ${e.toString()}',
+      );
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getWishlistItems(String userId) async {
+    try {
+      final response = await _supabaseClient
+          .from('wishlist')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(response);
+    } on PostgrestException catch (e) {
+      throw DatabaseException(
+        message: e.message,
+        code: e.code,
+      );
+    } catch (e) {
+      throw DatabaseException(
+        message: 'Failed to get wishlist items: ${e.toString()}',
+      );
+    }
+  }
+
+  Future<void> deleteWishlistItem(String itemId) async {
+    try {
+      print('DatabaseService: Deleting wishlist item: $itemId');
+      await _supabaseClient.from('wishlist').delete().eq('id', itemId);
+      print('DatabaseService: Wishlist item deleted successfully');
+    } on PostgrestException catch (e) {
+      throw DatabaseException(
+        message: e.message,
+        code: e.code,
+      );
+    } catch (e) {
+      throw DatabaseException(
+        message: 'Failed to delete wishlist item: ${e.toString()}',
+      );
+    }
+  }
 }
