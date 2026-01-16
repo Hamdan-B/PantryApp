@@ -89,7 +89,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         }
       }
 
-      state = AsyncValue.data(response.user);
+      // Don't log the user in automatically after signup
+      // They should verify their email and login manually
+      print(
+          'AuthNotifier: Signup completed - user must verify email and login');
+      state = const AsyncValue.data(null);
     } catch (e, stack) {
       print('AuthNotifier: Signup error: $e');
       state = AsyncValue.error(e, stack);
