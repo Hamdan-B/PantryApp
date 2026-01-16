@@ -41,8 +41,9 @@ final currentUserProvider = FutureProvider<User?>((ref) async {
 // Auth notifier
 class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   final SupabaseAuthService authService;
+  final Ref ref;
 
-  AuthNotifier(this.authService) : super(const AsyncValue.loading()) {
+  AuthNotifier(this.authService, this.ref) : super(const AsyncValue.loading()) {
     _initializeAuth();
   }
 
@@ -61,13 +62,38 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   }) async {
     state = const AsyncValue.loading();
     try {
+      print('AuthNotifier: Starting signup for $email');
       final response = await authService.signUp(
         email: email,
         password: password,
       );
+      print('AuthNotifier: Signup successful for user ${response.user?.id}');
+
+      // Create user record in database
+      if (response.user != null) {
+        try {
+          print('AuthNotifier: Creating user record in database');
+          final dbService = ref.read(databaseServiceProvider);
+          await dbService.createUser(
+            UserModel(
+              id: response.user!.id,
+              email: email,
+              createdAt: DateTime.now(),
+            ),
+          );
+          print('AuthNotifier: User record created successfully');
+        } catch (dbError) {
+          print(
+              'AuthNotifier: Warning - Failed to create user record: $dbError');
+          // Don't fail the signup if database record creation fails
+        }
+      }
+
       state = AsyncValue.data(response.user);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
+    } catch (e, stack) {
+      print('AuthNotifier: Signup error: $e');
+      state = AsyncValue.error(e, stack);
+      rethrow; // Re-throw so calling code can catch and handle
     }
   }
 
@@ -77,13 +103,20 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   }) async {
     state = const AsyncValue.loading();
     try {
+      print('AuthNotifier: Starting signin for $email');
       final response = await authService.signIn(
         email: email,
         password: password,
       );
+      print(
+          'AuthNotifier: Signin successful for user ${response.user?.id}, session: ${response.session != null}');
       state = AsyncValue.data(response.user);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
+      print('AuthNotifier: State updated with user');
+    } catch (e, stack) {
+      print('AuthNotifier: Signin error: $e');
+      print('Stack: $stack');
+      state = AsyncValue.error(e, stack);
+      rethrow; // Re-throw so calling code can catch and handle
     }
   }
 
@@ -100,7 +133,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
 final authNotifierProvider =
     StateNotifierProvider<AuthNotifier, AsyncValue<User?>>((ref) {
-  return AuthNotifier(ref.watch(authServiceProvider));
+  return AuthNotifier(ref.watch(authServiceProvider), ref);
 });
 
 // User profile provider

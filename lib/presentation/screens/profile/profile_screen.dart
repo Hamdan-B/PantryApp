@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pantry_app/presentation/providers/auth_provider.dart';
 import 'package:pantry_app/presentation/providers/theme_provider.dart';
-import 'package:pantry_app/presentation/screens/analytics/analytics_screen.dart';
 import 'package:pantry_app/data/models/user_model.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -105,13 +105,7 @@ class ProfileScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Card(
                       child: InkWell(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const AnalyticsScreen(),
-                            ),
-                          );
-                        },
+                        onTap: () => context.push('/analytics'),
                         child: const Padding(
                           padding: EdgeInsets.all(16),
                           child: Row(

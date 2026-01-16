@@ -36,13 +36,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
+      print('LoginScreen: Starting login attempt');
       final authNotifier = ref.read(authNotifierProvider.notifier);
       await authNotifier.signIn(
         email: emailController.text.trim(),
         password: passwordController.text,
       );
+      print('LoginScreen: Login successful');
+      // Don't navigate here - GoRouter will handle it based on auth state
     } on AppExceptions catch (e) {
-      setState(() => errorMessage = e.message);
+      print('LoginScreen: AppException - ${e.message}');
+      if (mounted) {
+        setState(() => errorMessage = e.message);
+      }
+    } catch (e, stack) {
+      print('LoginScreen: Unknown error - $e');
+      print('Stack: $stack');
+      if (mounted) {
+        setState(() => errorMessage = 'Login failed: ${e.toString()}');
+      }
     } finally {
       if (mounted) {
         setState(() => isLoading = false);

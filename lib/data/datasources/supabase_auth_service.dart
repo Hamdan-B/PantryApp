@@ -12,16 +12,21 @@ class SupabaseAuthService {
     required String password,
   }) async {
     try {
+      print('SupabaseAuthService: Attempting signup with email: $email');
       final response = await _supabaseClient.auth.signUp(
         email: email,
         password: password,
       );
+      print(
+          'SupabaseAuthService: Signup response - User ID: ${response.user?.id}, Session: ${response.session != null}');
       return response;
     } on gotrue.AuthException catch (e) {
+      print('SupabaseAuthService: AuthException during signup: ${e.message}');
       throw app_exceptions.AppExceptions.auth(
         message: e.message,
       );
     } catch (e) {
+      print('SupabaseAuthService: Exception during signup: $e');
       throw app_exceptions.AppExceptions.auth(
         message: 'Sign up failed: ${e.toString()}',
       );
@@ -33,16 +38,21 @@ class SupabaseAuthService {
     required String password,
   }) async {
     try {
+      print('SupabaseAuthService: Attempting signin with email: $email');
       final response = await _supabaseClient.auth.signInWithPassword(
         email: email,
         password: password,
       );
+      print(
+          'SupabaseAuthService: Signin response - User ID: ${response.user?.id}, Session: ${response.session != null}');
       return response;
     } on gotrue.AuthException catch (e) {
+      print('SupabaseAuthService: AuthException during signin: ${e.message}');
       throw app_exceptions.AppExceptions.auth(
         message: e.message,
       );
     } catch (e) {
+      print('SupabaseAuthService: Exception during signin: $e');
       throw app_exceptions.AppExceptions.auth(
         message: 'Sign in failed: ${e.toString()}',
       );

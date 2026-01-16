@@ -13,16 +13,38 @@ import 'package:pantry_app/presentation/screens/home/home_screen.dart';
 import 'package:pantry_app/presentation/screens/pantry/pantry_screen.dart';
 import 'package:pantry_app/presentation/screens/planner/planner_screen.dart';
 import 'package:pantry_app/presentation/screens/profile/profile_screen.dart';
+import 'package:pantry_app/presentation/screens/analytics/analytics_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Load environment variables from .env file
-  await dotenv.load(fileName: '.env');
-  // Initialize Supabase here when you have API keys
-  await Supabase.initialize(
-    url: AppConstants.supabaseUrl,
-    anonKey: AppConstants.supabaseAnonKey,
-  );
+  try {
+    // Load environment variables from .env file
+    await dotenv.load(fileName: '.env');
+    print('Environment loaded - URL: ${dotenv.env['SUPABASE_URL']}');
+    print(
+        'Environment loaded - Key exists: ${dotenv.env['SUPABASE_ANON_KEY'] != null}');
+    print('Environment loaded - Key value: ${dotenv.env['SUPABASE_ANON_KEY']}');
+
+    final url = AppConstants.supabaseUrl;
+    final key = AppConstants.supabaseAnonKey;
+
+    if (url.isEmpty || key.isEmpty) {
+      print('ERROR: Supabase URL or Key is empty!');
+      print('URL: $url');
+      print('Key length: ${key.length}');
+    }
+
+    // Initialize Supabase here when you have API keys
+    await Supabase.initialize(
+      url: url,
+      anonKey: key,
+    );
+    print('Supabase initialized successfully');
+    print('Supabase client available: ${Supabase.instance.client != null}');
+  } catch (e, stack) {
+    print('Failed to initialize app: $e');
+    print('Stack: $stack');
+  }
   runApp(const ProviderScope(child: PantryApp()));
 }
 
@@ -42,6 +64,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/',
         builder: (context, state) => const MainScreen(),
+      ),
+      GoRoute(
+        path: '/analytics',
+        builder: (context, state) => const AnalyticsScreen(),
       ),
     ],
     redirect: (context, state) {

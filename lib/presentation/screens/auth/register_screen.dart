@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pantry_app/presentation/providers/auth_provider.dart';
 import 'package:pantry_app/core/utils/exceptions.dart';
 
@@ -50,20 +51,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     try {
       final authNotifier = ref.read(authNotifierProvider.notifier);
+      print('Starting registration for email: ${emailController.text.trim()}');
       await authNotifier.signUp(
         email: emailController.text.trim(),
         password: passwordController.text,
       );
+      print('Registration successful, navigating to login');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content:
-                  Text('Registration successful! Please verify your email.')),
+          const SnackBar(content: Text('Registration successful.')),
         );
-        Navigator.of(context).pushReplacementNamed('/login');
+        // Use GoRouter instead of Navigator
+        context.go('/login');
       }
     } on AppExceptions catch (e) {
-      setState(() => errorMessage = e.message);
+      print('Registration AppException: ${e.message}');
+      if (mounted) {
+        setState(() => errorMessage = e.message);
+      }
+    } catch (e, stack) {
+      print('Registration unknown error: $e');
+      print('Stack: $stack');
+      if (mounted) {
+        setState(() => errorMessage = 'Registration failed: ${e.toString()}');
+      }
     } finally {
       if (mounted) {
         setState(() => isLoading = false);
@@ -152,7 +163,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             const SizedBox(height: 16),
             Center(
               child: GestureDetector(
-                onTap: () => Navigator.of(context).pushNamed('/login'),
+                onTap: () => context.go('/login'),
                 child: const Text(
                   'Already have an account? Login',
                   style: TextStyle(

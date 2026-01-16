@@ -11,15 +11,23 @@ class SupabaseDatabaseService {
   // User operations
   Future<void> createUser(UserModel user) async {
     try {
+      print(
+          'DatabaseService: Creating user with ID: ${user.id}, email: ${user.email}');
+      print('DatabaseService: User JSON: ${user.toJson()}');
       await _supabaseClient.from(AppConstants.usersTable).insert(
             user.toJson(),
           );
+      print('DatabaseService: User created successfully');
     } on PostgrestException catch (e) {
+      print(
+          'DatabaseService: PostgrestException - ${e.message} (code: ${e.code})');
       throw DatabaseException(
         message: e.message,
         code: e.code,
       );
-    } catch (e) {
+    } catch (e, stack) {
+      print('DatabaseService: Exception creating user - $e');
+      print('Stack: $stack');
       throw DatabaseException(
         message: 'Failed to create user: ${e.toString()}',
       );
